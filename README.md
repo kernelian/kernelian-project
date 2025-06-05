@@ -14,9 +14,9 @@ Output real system information
 
 Expand to 64 bit architecture
 
-# So-called bugs and real bugs
+# Kind of bugs and real bugs
 
-Real bugs and so-called bugs.
+Real bugs and kind of bugs
 
 # Real bugs
 When you try to create a file, it crashes.
