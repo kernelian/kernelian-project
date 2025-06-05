@@ -10,21 +10,18 @@ A real and working filesystem
 
 Multitasking
 
-
 Output real system information
-
 
 Expand to 64 bit architecture
 
-
-
-
 # So-called bugs and real bugs
 
+Real bugs and so-called bugs.
 
 # Real bugs
 When you try to create a file, it crashes.
 
 # Kind of bugs
 You can shoot the words in the spaceoshooter game
+
 You can erase the letters in draw
