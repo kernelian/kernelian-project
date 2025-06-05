@@ -105,7 +105,7 @@ void init_file_table() {
 
 
 
-
+// this doesn't work, probably has to be something with memory corruption.
 int create_file(const char* name, const u8* data, u32 size) {
     if (size > FILE_DATA_SIZE - next_free_offset) {
         return -1; // Not enough space
