@@ -16,7 +16,7 @@ Expand to 64 bit architecture
 
 # Kind of bugs and real bugs
 
-Real bugs and kind of bugs
+Kind of bugs and real bugs
 
 # Real bugs
 When you try to create a file, it crashes.
