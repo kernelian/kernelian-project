@@ -674,7 +674,7 @@ void kmain(void) {
     print("echo <put something in here> - Echo out what you typed out\n", &offset);
     print("ls - List files you created\n", &offset);
     print("read <filename> - Read out the file content\n", &offset);
-    print("create <filename> <file content> - (Not advised, can crash Kernelian!) Create a file with file context, make sure to not add any spaces in the filename, because it would be registered as file content! Use dashes instead.\n", &offset); // Added caution
+    // print("create <filename> <file content> - (Not advised, can crash Kernelian!) Create a file with file context, make sure to not add any spaces in the filename, because it would be registered as file content! Use dashes instead.\n", &offset); // Added caution, commented until fixed.  
     print("hi - Output <<Hello From Kernelian!>>\n", &offset);
     print("earth - Output Earth ASCII\n", &offset);
     print("void - Clear the shell\n", &offset);
