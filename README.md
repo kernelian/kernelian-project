@@ -1,4 +1,4 @@
-# The Kernelian Operating System
+# The Kernelian Operating System or KNU (Kernelian's not UNIX!)
 
 Kernelian is an i386 OS that can run on any i386 computer!
 
