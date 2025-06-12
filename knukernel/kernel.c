@@ -84,7 +84,7 @@ void print_ram_info(int *offset) {
     char msg[64];
     int i = 0;
 
-    const char *prefix = "Free RAM: ";
+    const char *prefix = "\nFree RAM: ";
     while (prefix[i]) {
         msg[i] = prefix[i];
         i++;
@@ -468,8 +468,8 @@ void kmain(void) {
     print("\nkernver - Output the version of Kernelian\n", &offset);
     print("kernfetch - Output the Kernelian ASCII K logo\n", &offset);
     print("echo <put something in here> - Echo out what you typed out\n", &offset);
-    print("ls - List files you created\n", &offset);
-    print("read <filename> - Read out the file content\n", &offset);
+    // print("ls - List files you created\n", &offset);       // Pseudo filesystem help commands commented out temporarily
+    // print("read <filename> - Read out the file content\n", &offset);
     // print("create <filename> <file content> - (Not advised, can crash Kernelian!) Create a file with file context, make sure to not add any spaces in the filename, because it would be registered as file content! Use dashes instead.\n", &offset); // Added caution, commented until fixed.  
     print("hi - Output <<Hello From Kernelian!>>\n", &offset);
     print("earth - Output Earth ASCII\n", &offset);
