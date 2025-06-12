@@ -266,62 +266,6 @@ void space_shooter(int *offset) {
 
 
 
-typedef struct {
-    int in_use;
-    char name[32];
-    unsigned char content[256];
-    int size;
-} File;
-
-File file_table[MAX_FILES];
-
-void init_file_table() {
-    for (int i = 0; i < MAX_FILES; i++) {
-        file_table[i].in_use = 0;
-    }
-}
-
-int create_file(const char* name, const unsigned char* content, int size) {
-    for (int i = 0; i < MAX_FILES; i++) {
-        if (!file_table[i].in_use) {
-            file_table[i].in_use = 1;
-            for (int j = 0; j < 32; j++) {
-                file_table[i].name[j] = name[j];
-                if (name[j] == '\0') break;
-            }
-            for (int j = 0; j < size; j++) {
-                file_table[i].content[j] = content[j];
-            }
-            file_table[i].size = size;
-            return 0; // success
-        }
-    }
-    return -1; // no space
-}
-
-int read_file(const char* name, unsigned char* out_content, int max_size) {
-    for (int i = 0; i < MAX_FILES; i++) {
-        if (file_table[i].in_use) {
-            int match = 1;
-            for (int j = 0; j < 32; j++) {
-                if (file_table[i].name[j] != name[j]) {
-                    match = 0;
-                    break;
-                }
-                if (name[j] == '\0') break;
-            }
-            if (match) {
-                int size_to_copy = file_table[i].size < max_size ? file_table[i].size : max_size;
-                for (int j = 0; j < size_to_copy; j++) {
-                    out_content[j] = file_table[i].content[j];
-                }
-                return size_to_copy;
-            }
-        }
-    }
-    return -1; // file not found
-}
-
 
 
 
