@@ -34,7 +34,6 @@ char keyboard_map[] = {
     'a','s','d','f','g','h','j','k','l',';','\'','`',0,
     '\\','z','x','c','v','b','n','m',',','.','/',0,
     '*',0,' ', // space
-    // Remaining keys ignored for now
 };
 
 char get_char_from_keyboard() {
@@ -64,5 +63,5 @@ char get_char_from_keyboard() {
 }
 
 char get_key() {
-    return get_char_from_keyboard(); // or poll_keyboard();
+    return get_char_from_keyboard();
 }

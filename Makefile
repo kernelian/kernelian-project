@@ -7,7 +7,7 @@ LD = ld -m elf_i386
 CFLAGS = -fno-stack-protector -fno-builtin -ffreestanding -Iinclude
 LDFLAGS = -T linker.ld
 
-SRC_C = knukernel/kernel.c drivers/vga.c drivers/keyboard.c
+SRC_C = knukernel/kernel.c drivers/vga.c drivers/keyboard.c drivers/pci.c
 OBJ_C = $(SRC_C:.c=.o)
 
 BOOT_OBJ = knukernel/boot.o

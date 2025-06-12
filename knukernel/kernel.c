@@ -1,5 +1,6 @@
 #include "vga.h"
 #include "keyboard.h"
+#include "pci.h"
 extern char get_char_from_keyboard();
 
 #define SCREEN_WIDTH 80
@@ -20,7 +21,6 @@ void scroll_up() {
 }
 
 // Print and detect scroll
-// Add a global variable to hold the current color (default white on black)
 unsigned char current_color = WHITE_ON_BLACK;
 
 int print(const char *str, int *offset) {
@@ -46,6 +46,33 @@ int print(const char *str, int *offset) {
 
     return scrolled;
 }
+
+
+
+
+
+int offset = 0;
+
+
+// Helper to convert a nibble to hex char
+char nibble_to_hex(unsigned char nibble) {
+    return (nibble < 10) ? ('0' + nibble) : ('A' + nibble - 10);
+}
+
+// Print hex value
+void print_hex(unsigned int val, int *offset) {
+    print("0x", offset);
+
+    for (int i = 3; i >= 0; i--) {
+        unsigned char nibble = (val >> (i * 4)) & 0xF;
+        char hex_char[2] = { nibble_to_hex(nibble), '\0' };
+        print(hex_char, offset);
+    }
+}
+
+
+
+
 
 
 // RAM command output
@@ -692,6 +719,12 @@ void kmain(void) {
            buffer[2] == 'a' && buffer[3] == 'w') {
     enter_draw_mode(&offset);
 
+
+
+
+           } else if (index == 3 && buffer[0] == 'p' && buffer[1] == 'c' && buffer[2] == 'i') {
+               current_color = 0x0E; // Yellow or whatever you like
+               pci_scan(&offset);
 
 
 
