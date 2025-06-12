@@ -7,10 +7,9 @@ It's not perfect, because it can have weird bugs all the time.
 # Roadmap
 A real and working filesystem
 
-
 Multitasking
 
-Output real system information
+Output real system information (✅ Done)
 
 Expand to 64 bit architecture
 
