@@ -710,6 +710,7 @@ void kmain(void) {
     print("color - Outputs red color\n", &offset);
     print("ram - Output fake RAM usage\n", &offset);
     print("draw - Draw!\n", &offset);
+    print("pci - List PCI buses\n", &offset);
 
 
 
