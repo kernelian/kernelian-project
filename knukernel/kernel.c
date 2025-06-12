@@ -93,109 +93,7 @@ void print_ram_info(int *offset) {
 
 
 
-    #define MAX_FILES 16
-#define MAX_FILENAME_LENGTH 16
-#define FILE_DATA_SIZE 4096  // total bytes for file contents
-
-typedef unsigned char u8;
-typedef unsigned int u32;
-
-struct FileEntry {
-    char name[MAX_FILENAME_LENGTH];
-    u32 start_offset;
-    u32 size;
-    u8 in_use;
-};
-
-struct FileEntry file_table[MAX_FILES];
-u8 file_data_area[FILE_DATA_SIZE];
-
-u32 next_free_offset = 0;
-
-
-
-
-
-
-
-
-
-
-void init_file_table() {
-    for (u32 i = 0; i < MAX_FILES; i++) {
-        file_table[i].in_use = 0;
-    }
-    next_free_offset = 0;
-}
-
-
-
-
-
-// this doesn't work, probably has to be something with memory corruption.
-int create_file(const char* name, const u8* data, u32 size) {
-    if (size > FILE_DATA_SIZE - next_free_offset) {
-        return -1; // Not enough space
-    }
-
-    // Find free slot
-    u32 slot = MAX_FILES;
-    for (u32 i = 0; i < MAX_FILES; i++) {
-        if (file_table[i].in_use == 0) {
-            slot = i;
-            break;
-        }
-    }
-    if (slot == MAX_FILES) return -2; // No free file slots
-
-    // Copy file data into data area
-    for (u32 i = 0; i < size; i++) {
-        file_data_area[next_free_offset + i] = data[i];
-    }
-
-    // Fill file table entry
-    for (u32 i = 0; i < MAX_FILENAME_LENGTH - 1 && name[i] != 0; i++) {
-        file_table[slot].name[i] = name[i];
-        file_table[slot].name[i+1] = 0;
-    }
-    file_table[slot].start_offset = next_free_offset;
-    file_table[slot].size = size;
-    file_table[slot].in_use = 1;
-
-    next_free_offset += size;
-    return 0; // Success
-}
-
-
-
-
-
-
-
-int read_file(const char* name, u8* out_buffer, u32 max_size) {
-    for (u32 i = 0; i < MAX_FILES; i++) {
-        if (file_table[i].in_use == 1) {
-            // Simple string compare
-            int match = 1;
-            for (u32 j = 0; j < MAX_FILENAME_LENGTH; j++) {
-                if (file_table[i].name[j] != name[j]) {
-                    match = 0;
-                    break;
-                }
-                if (name[j] == 0) break;
-            }
-            if (match) {
-                u32 size_to_copy = file_table[i].size;
-                if (size_to_copy > max_size) size_to_copy = max_size;
-                for (u32 k = 0; k < size_to_copy; k++) {
-                    out_buffer[k] = file_data_area[file_table[i].start_offset + k];
-                }
-                return size_to_copy; // Return number of bytes read
-            }
-        }
-    }
-    return -1; // File not found
-}
+ 
 
 
 
@@ -508,8 +406,6 @@ void kmain(void) {
     int offset = 0;
     print("Hello! Welcome to Kernelian 0.1. Type help for the list of commands.\n", &offset);
     
-
-    init_file_table();
     
     
     while (1) {
@@ -612,78 +508,7 @@ void kmain(void) {
             space_shooter(&offset);
 
 
-} else if (index >= 3 &&
-           buffer[0] == 'c' && buffer[1] == 'r' && buffer[2] == 'e' &&
-           buffer[3] == 'a' && buffer[4] == 't' && buffer[5] == 'e' && buffer[6] == ' ') {
-    // Parse command: create <name> <content>
-    int name_start = 7;
-    int name_end = name_start;
-    while (name_end < index && buffer[name_end] != ' ') name_end++;
 
-    if (name_end >= index - 1) {
-
-        current_color = 0x0F;
-        print("\nUsage: create <name> <data>", &offset);
-    } else {
-        char name[32] = {0};
-        unsigned char content[256] = {0};
-        int content_len = 0;
-
-        for (int i = name_start; i < name_end && i - name_start < 31; i++) {
-            name[i - name_start] = buffer[i];
-        }
-
-        int content_start = name_end + 1;
-        for (int i = content_start; i < index && content_len < 256; i++) {
-            content[content_len++] = (unsigned char)buffer[i];
-        }
-
-        int res = create_file(name, content, content_len);
-        if (res == 0) {
-            current_color = 0x0A;
-            print("\nFile created successfully!", &offset);
-        } else {
-            current_color = 0x4;
-            print("\nFailed to create file.", &offset);
-        }
-    }
-
-} else if (index >= 2 &&
-           buffer[0] == 'r' && buffer[1] == 'e' && buffer[2] == 'a' &&
-           buffer[3] == 'd' && buffer[4] == ' ') {
-    // Parse command: read <name>
-    char name[32] = {0};
-    int name_len = 0;
-
-    for (int i = 5; i < index && name_len < 31; i++) {
-        name[name_len++] = buffer[i];
-    }
-
-    unsigned char content[256] = {0};
-    int read_bytes = read_file(name, content, 256);
-    if (read_bytes > 0) {
-        current_color = 0x0F;
-        print("\nFile content: ", &offset);
-        for (int i = 0; i < read_bytes; i++) {
-            char ch[2] = {content[i], 0};
-            print(ch, &offset);
-            current_color = 0x0F;
-        }
-    } else {
-        current_color = 0x4;
-        print("\nFile not found or empty.", &offset);
-    }
-
-
-        } else if (index == 2 && buffer[0] == 'l' && buffer[1] == 's') {
-    current_color = 0x0F;
-    print("\nFiles:\n", &offset);
-    for (int i = 0; i < MAX_FILES; i++) {
-        if (file_table[i].in_use) {
-            print(file_table[i].name, &offset);
-            print("\n", &offset);
-        }
-    }
 
 
 
@@ -724,7 +549,7 @@ void kmain(void) {
 
 
            } else if (index == 3 && buffer[0] == 'p' && buffer[1] == 'c' && buffer[2] == 'i') {
-               current_color = 0x0E; // Yellow or whatever you like
+               current_color = 0x0E;
                pci_scan(&offset);
 
 
