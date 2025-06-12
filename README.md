@@ -19,7 +19,7 @@ Expand to 64 bit architecture
 Kind of bugs and real bugs
 
 # Real bugs
-When you try to create a file, it crashes.
+When you try to create a file, it crashes. (temporarily fixed by removing the pseudo-filesystem)
 
 # Kind of bugs
 You can shoot the words in the spaceoshooter game
