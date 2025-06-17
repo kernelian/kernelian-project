@@ -374,15 +374,12 @@ void enter_draw_mode(int* offset_ptr) {
 
 
 
-
-// Kernel main function
+// kmain
 void kmain(void) {
     current_color = 0x0B;
     int offset = 0;
     print("Hello! Welcome to Kernelian 0.1. Type help for the list of commands.\n", &offset);
-    
-    
-    
+
     while (1) {
         new_prompt_line(&offset);
 
@@ -412,136 +409,95 @@ void kmain(void) {
             }
         }
 
-        if (index == 2 && buffer[0] == 'h' && buffer[1] == 'i') {
+        // Null-terminate just to be sure
+        buffer[index] = '\0';
+
+        // === Command Handling ===
+        if (strcmp(buffer, "hi") == 0) {
             current_color = 0x0F;
             print("\nHello from Kernelian!", &offset);
 
-       } else if (index == 7 &&
-                   buffer[0] == 'k' && buffer[1] == 'e' && buffer[2] == 'r' &&
-                   buffer[3] == 'n' && buffer[4] == 'v' && buffer[5] == 'e' &&
-                   buffer[6] == 'r') {
+        } else if (strcmp(buffer, "kernver") == 0) {
             current_color = 0x0F;
             print("\nKernelian v0.1 (i386) - An OS that says hello to your hardware once again!", &offset);
-        
 
-        } else if (index == 4 && buffer[0] == 'v' &&
-                   buffer[1] == 'o' && buffer[2] == 'i' && buffer[3] == 'd') {
+        } else if (strcmp(buffer, "void") == 0) {
             offset = 0;
             for (int i = 0; i < SCREEN_WIDTH * SCREEN_HEIGHT * 2; i += 2) {
                 set_char_at_video_memory(' ', i);
             }
-        } else if (index == 3 && buffer[0] == 'r' &&
-                   buffer[1] == 'a' && buffer[2] == 'm') {
+
+        } else if (strcmp(buffer, "ram") == 0) {
             current_color = 0x0F;
             print_ram_info(&offset);
 
+        } else if (strcmp(buffer, "why") == 0) {
+            current_color = 0x0F;
+            print("\nBecause that's how Kernelian rolls.", &offset);
 
-                   } else if (index == 3 && buffer[0] == 'w' && buffer[1] == 'h' && buffer[2] == 'y') {
-                        current_color = 0x0F;
-                        print("\nBecause that's how Kernelian rolls.", &offset);
+        } else if (strcmp(buffer, "earth") == 0) {
+            current_color = 0x0A;
+            print("\n           _____\n", &offset);
+            print("         .-'.  ':'-.\n", &offset);
+            print("       .''::: .:    '.\n", &offset);
+            print("      /   :::::'      \\\n", &offset);
+            print("     ;.    ':' `       ;\n", &offset);
+            print("     |       '..       |\n", &offset);
+            print("     ; '      ::::.    ;\n", &offset);
+            print("      \\       '::::   /\n", &offset);
+            print("       '.      :::  .'\n", &offset);
+            print("         '-.___'_.-'\n", &offset);
 
-                    } else if (index == 5 &&
-           buffer[0] == 'e' && buffer[1] == 'a' &&
-           buffer[2] == 'r' && buffer[3] == 't' &&
-           buffer[4] == 'h') {
-    current_color = 0x0A;
-    print("\n           _____\n", &offset);
-    print("         .-'.  ':'-.\n", &offset);
-    print("       .''::: .:    '.\n", &offset);
-    print("      /   :::::'      \\\n", &offset);
-    print("     ;.    ':' `       ;\n", &offset);
-    print("     |       '..       |\n", &offset);
-    print("     ; '      ::::.    ;\n", &offset);
-    print("      \\       '::::   /\n", &offset);
-    print("       '.      :::  .'\n", &offset);
-    print("         '-.___'_.-'\n", &offset);
+        } else if (strcmp(buffer, "kernfetch") == 0) {
+            current_color = 0x0F;
+            print("\nKKK       KKK\n", &offset);
+            print("KKK     KKK\n", &offset);
+            print("KKK   KKK\n", &offset);
+            print("KKK KKK\n", &offset);
+            print("KKK KKK\n", &offset);
+            print("KKK   KKK\n", &offset);
+            print("KKK     KKK\n", &offset);
+            print("KKK       KKK\n", &offset);
+            print("KKK         KKK\n", &offset);
 
-
-
-    } else if (index == 9 &&
-           buffer[0] == 'k' && buffer[1] == 'e' && buffer[2] == 'r' &&
-           buffer[3] == 'n' && buffer[4] == 'f' && buffer[5] == 'e' &&
-           buffer[6] == 't' && buffer[7] == 'c' && buffer[8] == 'h') {
-    current_color = 0x0F;
-    print("\nKKK       KKK\n", &offset);
-    print("KKK     KKK\n", &offset);
-    print("KKK   KKK\n", &offset);
-    print("KKK KKK\n", &offset);
-    print("KKK KKK\n", &offset);
-    print("KKK   KKK\n", &offset);
-    print("KKK     KKK\n", &offset);
-    print("KKK       KKK\n", &offset);
-    print("KKK         KKK\n", &offset);
-
-
-        } else if (index == 13 &&
-                   buffer[0] == 's' && buffer[1] == 'p' && buffer[2] == 'a' &&
-                   buffer[3] == 'c' && buffer[4] == 'e' && buffer[5] == 'o' &&
-                   buffer[6] == 's' && buffer[7] == 'h' && buffer[8] == 'o' &&
-                   buffer[9] == 'o' && buffer[10] == 't' && buffer[11] == 'e' &&
-                   buffer[12] == 'r') {
+        } else if (strcmp(buffer, "spaceoshooter") == 0) {
             space_shooter(&offset);
 
+        } else if (strcmp(buffer, "color") == 0) {
+            current_color = 0x0C;
+            print("\nThis is red text!", &offset);
+            current_color = WHITE_ON_BLACK;
 
+        } else if (strcmp(buffer, "draw") == 0) {
+            enter_draw_mode(&offset);
 
+        } else if (strcmp(buffer, "pci") == 0) {
+            current_color = 0x0E;
+            pci_scan(&offset);
 
+        } else if (strncmp(buffer, "echo ", 5) == 0) {
+            current_color = 0x0F;
+            print("\n", &offset);
+            print(&buffer[5], &offset);
 
+        } else if (strcmp(buffer, "help") == 0) {
+            current_color = 0x0F;
+            print("\nkernver - Output the version of Kernelian\n", &offset);
+            print("kernfetch - Output the Kernelian ASCII K logo\n", &offset);
+            print("echo <text> - Echo out what you typed\n", &offset);
+            print("hi - Output <<Hello From Kernelian!>>\n", &offset);
+            print("earth - Output Earth ASCII\n", &offset);
+            print("void - Clear the shell\n", &offset);
+            print("spaceoshooter - Play a game of Space Shooter\n", &offset);
+            print("why - Explains why :-)\n", &offset);
+            print("color - Outputs red color\n", &offset);
+            print("ram - Output fake RAM usage\n", &offset);
+            print("draw - Enter drawing mode\n", &offset);
+            print("pci - List PCI buses\n", &offset);
 
-
-} else if (index == 5 && buffer[0] == 'c' && buffer[1] == 'o' && buffer[2] == 'l' && buffer[3] == 'o' && buffer[4] == 'r') {
-    current_color = 0x0C;  // red color
-    print("\nThis is red text!", &offset);
-    current_color = WHITE_ON_BLACK; // reset color
-
-
-} else if (index == 4 && buffer[0] == 'h' && buffer[1] == 'e' && buffer[2] == 'l' && buffer[3] == 'p') {
-    current_color = 0x0F;
-    print("\nkernver - Output the version of Kernelian\n", &offset);
-    print("kernfetch - Output the Kernelian ASCII K logo\n", &offset);
-    print("echo <put something in here> - Echo out what you typed out\n", &offset);
-    // print("ls - List files you created\n", &offset);       // Pseudo filesystem help commands commented out temporarily
-    // print("read <filename> - Read out the file content\n", &offset);
-    // print("create <filename> <file content> - (Not advised, can crash Kernelian!) Create a file with file context, make sure to not add any spaces in the filename, because it would be registered as file content! Use dashes instead.\n", &offset); // Added caution, commented until fixed.  
-    print("hi - Output <<Hello From Kernelian!>>\n", &offset);
-    print("earth - Output Earth ASCII\n", &offset);
-    print("void - Clear the shell\n", &offset);
-    print("spaceoshooter - Play a game of Space Shooter\n", &offset);
-    print("why - Explains why :-)\n", &offset);
-    print("color - Outputs red color\n", &offset);
-    print("ram - Output fake RAM usage\n", &offset);
-    print("draw - Draw!\n", &offset);
-    print("pci - List PCI buses\n", &offset);
-
-
-
-
-    } else if (index == 4 &&
-           buffer[0] == 'd' && buffer[1] == 'r' &&
-           buffer[2] == 'a' && buffer[3] == 'w') {
-    enter_draw_mode(&offset);
-
-
-
-
-           } else if (index == 3 && buffer[0] == 'p' && buffer[1] == 'c' && buffer[2] == 'i') {
-               current_color = 0x0E;
-               pci_scan(&offset);
-
-
-
-
-
-                
-    } else if (index >= 5 &&
-           buffer[0] == 'e' && buffer[1] == 'c' &&
-           buffer[2] == 'h' && buffer[3] == 'o' && buffer[4] == ' ') {
-    // Echo everything after "echo "
-    current_color = 0x0F; // white, because green would look weird.
-    print("\n", &offset);
-    print(&buffer[5], &offset);
-} else {
-    current_color = 0x4;
-    print("\nUnknown command.", &offset);
-}
+        } else {
+            current_color = 0x4;
+            print("\nUnknown command.", &offset);
+        }
     }
 }
