@@ -1,6 +1,8 @@
 #include "vga.h"
 #include "keyboard.h"
 #include "pci.h"
+#include "delay.h"
+#include "io.h"
 extern char get_char_from_keyboard();
 
 #define SCREEN_WIDTH 80
@@ -267,66 +269,95 @@ void space_shooter(int *offset) {
 
 
 
-
-
-
-
-
-
 void enter_draw_mode(int* offset_ptr) {
     clear_screen(offset_ptr);
 
     int x = 0, y = 0;
     int prev_x = 0, prev_y = 0;
-    char drawn[25][80] = {{0}}; // Tracks where 'O' has been drawn
+    int prev_draw_enabled = -1;
+    int prev_cursor_offset = -1;
 
-    
-    clear_screen(offset_ptr);
+    char drawn[25][80] = {{0}};
+    int draw_enabled = 0;
+
     print("DRAW MODE: WASD to move, SPACE to draw, Q to quit\n", offset_ptr);
 
-
     while (1) {
-        char key = get_key();
+        // ✅ Read keyboard if available
+        if ((inb(0x64) & 1)) {
+            unsigned char scancode = inb(0x60);
 
-                if (key == 'q') {
-            clear_screen(offset_ptr);  // <--- Clear screen before quitting
-            current_color = 0x0B;
-            print("Exited draw mode.\n", offset_ptr);            
-            break;
+            if (scancode == 0x39) draw_enabled = 1;     // SPACE pressed
+            else if (scancode == 0xB9) draw_enabled = 0; // SPACE released
+
+            // Movement and exit
+            switch (scancode) {
+                case 0x11: y = (y > 0) ? y - 1 : y; break;
+                case 0x1F: y = (y < 24) ? y + 1 : y; break;
+                case 0x1E: x = (x > 0) ? x - 1 : x; break;
+                case 0x20: x = (x < 79) ? x + 1 : x; break;
+                case 0x10:
+                    clear_screen(offset_ptr);
+                    current_color = 0x0B;
+                    print("Exited draw mode.\n", offset_ptr);
+                    return;
+            }
         }
-
-
-        // Save previous position
-        prev_x = x;
-        prev_y = y;
-
-        // Update position
-        if (key == 'w' && y > 0) y--;
-        if (key == 's' && y < 24) y++;
-        if (key == 'a' && x > 0) x--;
-        if (key == 'd' && x < 79) x++;
 
         int prev_offset = (prev_y * 80 + prev_x) * 2;
         int offset = (y * 80 + x) * 2;
 
-        // Erase old cursor
-        if (drawn[prev_y][prev_x]) {
-            set_char_at_video_memory_color('O', prev_offset, make_color(15, 0)); // Restore drawn char
-        } else {
-            set_char_at_video_memory_color(' ', prev_offset, make_color(0, 0));  // Just blank space
-        }
+        // 🧠 Only update screen if something changed
+        if (x != prev_x || y != prev_y || draw_enabled != prev_draw_enabled) {
 
-        // Draw new cursor
-        if (key == ' ') {
-            drawn[y][x] = 1;
-            set_char_at_video_memory_color('O', offset, make_color(15, 0)); // white on black
-        } else {
-            set_char_at_video_memory_color('_', offset, make_color(7, 0));  // gray underscore
-        }
+            // Redraw old position
+            if (drawn[prev_y][prev_x]) {
+                set_char_at_video_memory_color('O', prev_offset, make_color(15, 0));
+            } else {
+                set_char_at_video_memory_color(' ', prev_offset, make_color(0, 0));
+            }
 
-        set_cursor(offset);
+            // Draw current position
+            if (draw_enabled) {
+                drawn[y][x] = 1;
+                set_char_at_video_memory_color('O', offset, make_color(15, 0));
+            } else {
+                set_char_at_video_memory_color('_', offset, make_color(7, 0));
+            }
+
+            // Move cursor only when needed
+            if (offset != prev_cursor_offset) {
+                set_cursor(offset);
+                prev_cursor_offset = offset;
+            }
+
+            // Save state
+            prev_x = x;
+            prev_y = y;
+            prev_draw_enabled = draw_enabled;
+        }
     }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
