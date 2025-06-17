@@ -283,7 +283,7 @@ void enter_draw_mode(int* offset_ptr) {
     print("DRAW MODE: WASD to move, SPACE to draw, Q to quit\n", offset_ptr);
 
     while (1) {
-        // ✅ Read keyboard if available
+       
         if ((inb(0x64) & 1)) {
             unsigned char scancode = inb(0x60);
 
@@ -307,7 +307,7 @@ void enter_draw_mode(int* offset_ptr) {
         int prev_offset = (prev_y * 80 + prev_x) * 2;
         int offset = (y * 80 + x) * 2;
 
-        // 🧠 Only update screen if something changed
+        
         if (x != prev_x || y != prev_y || draw_enabled != prev_draw_enabled) {
 
             // Redraw old position
