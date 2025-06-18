@@ -2,7 +2,7 @@
 
 Kernelian is an i386 OS that can run on any i386 computer!
 
-It's not perfect, because it can have weird bugs all the time.
+It's not perfect, because it can have weird bugs all the time. (and sometimes some feature removals because of that)
 
 # Roadmap
 A real and working filesystem
