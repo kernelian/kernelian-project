@@ -514,7 +514,7 @@ void kmain(void) {
             print("draw - Enter drawing mode\n", &offset);
             print("pci - List PCI buses\n", &offset);
             print("reboot - Reboots\n", &offset);
-            print("shutdown --qemu - ONLY WORKS WITH THIS EXACT PARAMETER. (NOT RECOMMENDED FOR REAL HARDWARE, WILL PROBABLY NOT WORK.) \n", &offset);
+            print("shutdown --qemu - Shutdowns, ONLY WORKS WITH THIS EXACT PARAMETER. (NOT RECOMMENDED FOR REAL HARDWARE, WILL PROBABLY NOT WORK.) \n", &offset);
 
         } else {
             current_color = 0x4;
