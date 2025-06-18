@@ -7,7 +7,15 @@ LD = ld -m elf_i386
 CFLAGS = -fno-stack-protector -fno-builtin -ffreestanding -Iinclude
 LDFLAGS = -T linker.ld
 
-SRC_C = knukernel/kernel.c drivers/vga.c drivers/keyboard.c drivers/pci.c
+SRC_C = \
+	knukernel/kernel.c \
+	drivers/vga.c \
+	drivers/keyboard.c \
+	drivers/pci.c \
+	drivers/delay.c \
+	libk/knulib.c
+
+
 OBJ_C = $(SRC_C:.c=.o)
 
 BOOT_OBJ = knukernel/boot.o
@@ -19,9 +27,20 @@ KERNEL_BIN = kernel
 
 all: $(KERNEL_BIN)
 
+
+
 $(KERNEL_BIN): $(BOOT_OBJ) $(OBJ_C)
 	$(LD) $(LDFLAGS) -o $@ $^
 
+# Explicit rule for subdir file
+libk/knulib.o: libk/knulib.c
+	$(CC) $(CFLAGS) -c $< -o $@
+
+# Generic rule (for other .c files in flat dirs)
+%.o: %.c
+	$(CC) $(CFLAGS) -c $< -o $@
+
+# Generic rule for compiling C files from subdirs to same-path .o files
 %.o: %.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
@@ -37,5 +56,6 @@ run: iso
 	qemu-system-i386 kernelian.iso
 
 clean:
-	rm -f $(KERNEL_BIN) knukernel/*.o drivers/*.o
+	rm -f $(KERNEL_BIN) knukernel/*.o drivers/*.o libk/*.o
 	rm -f kernelian.iso
+

@@ -3,11 +3,29 @@
 #include "pci.h"
 #include "delay.h"
 #include "io.h"
+#include "knulib.h"
 extern char get_char_from_keyboard();
+
+
 
 #define SCREEN_WIDTH 80
 #define SCREEN_HEIGHT 25
 #define VIDEO_MEMORY ((char*)0xB8000)
+
+
+void reboot() {
+    while (inb(0x64) & 0x02);  // Wait until input buffer is clear
+    outb(0x64, 0xFE);          // Send reboot command
+    for (;;) __asm__ volatile ("hlt");
+}
+
+
+void shutdown_qemu() {
+    outw(0x604, 0x2000);
+    outw(0xB004, 0x2000); // Backup method
+    for (;;) __asm__ volatile ("hlt");
+}
+
 
 // Proper scroll logic
 void scroll_up() {
@@ -95,9 +113,6 @@ void print_ram_info(int *offset) {
 
 
 
- 
-
-
 
 
 
@@ -154,7 +169,7 @@ void new_prompt_line(int *offset) {
     }
 
     current_color = 0x2;
-    print("Kernelian> ", offset);
+    print("[kernelian]$ ", offset);
     set_cursor(*offset);
 }
 
@@ -266,76 +281,58 @@ void space_shooter(int *offset) {
 
 
 
-
-
-
 void enter_draw_mode(int* offset_ptr) {
     clear_screen(offset_ptr);
 
     int x = 0, y = 0;
     int prev_x = 0, prev_y = 0;
-    int prev_draw_enabled = -1;
-    int prev_cursor_offset = -1;
-
     char drawn[25][80] = {{0}};
-    int draw_enabled = 0;
 
+
+    clear_screen(offset_ptr);
     print("DRAW MODE: WASD to move, SPACE to draw, Q to quit\n", offset_ptr);
 
+
     while (1) {
-       
-        if ((inb(0x64) & 1)) {
-            unsigned char scancode = inb(0x60);
+        char key = get_key();
 
-            if (scancode == 0x39) draw_enabled = 1;     // SPACE pressed
-            else if (scancode == 0xB9) draw_enabled = 0; // SPACE released
-
-            // Movement and exit
-            switch (scancode) {
-                case 0x11: y = (y > 0) ? y - 1 : y; break;
-                case 0x1F: y = (y < 24) ? y + 1 : y; break;
-                case 0x1E: x = (x > 0) ? x - 1 : x; break;
-                case 0x20: x = (x < 79) ? x + 1 : x; break;
-                case 0x10:
-                    clear_screen(offset_ptr);
-                    current_color = 0x0B;
-                    print("Exited draw mode.\n", offset_ptr);
-                    return;
-            }
+        if (key == 'q') {
+            clear_screen(offset_ptr);
+            current_color = 0x0B;
+            print("Exited draw mode.\n", offset_ptr);
+            break;
         }
+
+
+        // Save previous position
+        prev_x = x;
+        prev_y = y;
+
+        // Update position
+        if (key == 'w' && y > 0) y--;
+        if (key == 's' && y < 24) y++;
+        if (key == 'a' && x > 0) x--;
+        if (key == 'd' && x < 79) x++;
 
         int prev_offset = (prev_y * 80 + prev_x) * 2;
         int offset = (y * 80 + x) * 2;
 
-        
-        if (x != prev_x || y != prev_y || draw_enabled != prev_draw_enabled) {
-
-            // Redraw old position
-            if (drawn[prev_y][prev_x]) {
-                set_char_at_video_memory_color('O', prev_offset, make_color(15, 0));
-            } else {
-                set_char_at_video_memory_color(' ', prev_offset, make_color(0, 0));
-            }
-
-            // Draw current position
-            if (draw_enabled) {
-                drawn[y][x] = 1;
-                set_char_at_video_memory_color('O', offset, make_color(15, 0));
-            } else {
-                set_char_at_video_memory_color('_', offset, make_color(7, 0));
-            }
-
-            // Move cursor only when needed
-            if (offset != prev_cursor_offset) {
-                set_cursor(offset);
-                prev_cursor_offset = offset;
-            }
-
-            // Save state
-            prev_x = x;
-            prev_y = y;
-            prev_draw_enabled = draw_enabled;
+        // Erase old cursor
+        if (drawn[prev_y][prev_x]) {
+            set_char_at_video_memory_color('O', prev_offset, make_color(15, 0)); // Restore drawn char
+        } else {
+            set_char_at_video_memory_color(' ', prev_offset, make_color(0, 0));  // Just blank space
         }
+
+        // Draw new cursor
+        if (key == ' ') {
+            drawn[y][x] = 1;
+            set_char_at_video_memory_color('O', offset, make_color(15, 0)); // white on black
+        } else {
+            set_char_at_video_memory_color('_', offset, make_color(7, 0));  // gray underscore
+        }
+
+        set_cursor(offset);
     }
 }
 
@@ -367,16 +364,8 @@ void enter_draw_mode(int* offset_ptr) {
 
 
 
-
-
-
-
-
-
-
-// kmain
 void kmain(void) {
-    current_color = 0x0B;
+    current_color = 0x9;
     int offset = 0;
     print("Hello! Welcome to Kernelian 0.1. Type help for the list of commands.\n", &offset);
 
@@ -409,6 +398,16 @@ void kmain(void) {
             }
         }
 
+
+
+
+
+
+
+
+
+
+
         // Null-terminate just to be sure
         buffer[index] = '\0';
 
@@ -426,6 +425,22 @@ void kmain(void) {
             for (int i = 0; i < SCREEN_WIDTH * SCREEN_HEIGHT * 2; i += 2) {
                 set_char_at_video_memory(' ', i);
             }
+
+        } else if (strcmp(buffer, "reboot") == 0) {
+            current_color = 0x0B;
+            print("\n[?] You've got it! Rebooting..", &offset);
+            delay_ms(500);
+            reboot();
+
+
+
+
+        } else if (strcmp(buffer, "shutdown --qemu") == 0) {
+            current_color = 0x0B;
+            print("\n[?] You've got it! Shutting down..", &offset);
+            delay_ms(500);
+            shutdown_qemu();
+
 
         } else if (strcmp(buffer, "ram") == 0) {
             current_color = 0x0F;
@@ -480,6 +495,10 @@ void kmain(void) {
             print("\n", &offset);
             print(&buffer[5], &offset);
 
+        } else if (strcmp(buffer, "shutdown") == 0) {
+            current_color = 0x4;
+            print("\n[!] Only works with the --qemu parameter at the moment.", &offset);
+
         } else if (strcmp(buffer, "help") == 0) {
             current_color = 0x0F;
             print("\nkernver - Output the version of Kernelian\n", &offset);
@@ -494,10 +513,13 @@ void kmain(void) {
             print("ram - Output fake RAM usage\n", &offset);
             print("draw - Enter drawing mode\n", &offset);
             print("pci - List PCI buses\n", &offset);
+            print("reboot - Reboots\n", &offset);
+            print("shutdown --qemu - ONLY WORKS WITH THIS EXACT PARAMETER. (NOT RECOMMENDED FOR REAL HARDWARE, WILL PROBABLY NOT WORK.) \n", &offset);
 
         } else {
             current_color = 0x4;
-            print("\nUnknown command.", &offset);
+            print("\n[!] Unknown command.", &offset);
         }
     }
 }
+
