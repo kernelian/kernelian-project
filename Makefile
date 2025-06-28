@@ -12,7 +12,6 @@ SRC_C = \
 	drivers/vga.c \
 	drivers/keyboard.c \
 	drivers/pci.c \
-	drivers/delay.c \
 	libk/knulib.c
 
 
