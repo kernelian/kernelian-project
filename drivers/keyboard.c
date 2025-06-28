@@ -64,5 +64,5 @@ char get_char_from_keyboard() {
 }
 
 char get_key() {
-    return get_char_from_keyboard(); // or poll_keyboard();
+    return get_char_from_keyboard();
 }
