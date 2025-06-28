@@ -2,50 +2,67 @@
 #include "vga.h"
 #include "keyboard.h"
 
-static inline unsigned char inb(unsigned short port) {
-    unsigned char result;
+#define KEYBOARD_PORT 0x60
+
+static inline uint8_t inb(uint16_t port) {
+    uint8_t result;
     __asm__ volatile ("inb %1, %0" : "=a"(result) : "Nd"(port));
     return result;
 }
-
-// Simple polling function
-char poll_keyboard() {
-    if ((inb(0x64) & 1) == 0) {
-        return 0; // No key pressed
-    }
-
-    unsigned char scancode = inb(0x60);
-
-    switch (scancode) {
-        case 0x11: return 'w'; // W key
-        case 0x1F: return 's'; // S key
-        case 0x1E: return 'a'; // A key
-        case 0x20: return 'd'; // D key
-        case 0x39: return ' '; // Space key
-        default: return 0; // Unsupported key
-    }
-}
-
-#define KEYBOARD_PORT 0x60
 
 char keyboard_map[] = {
     0, 27, '1','2','3','4','5','6','7','8','9','0','-','=', '\b',
     '\t','q','w','e','r','t','y','u','i','o','p','[',']','\n',0,
     'a','s','d','f','g','h','j','k','l',';','\'','`',0,
     '\\','z','x','c','v','b','n','m',',','.','/',0,
-    '*',0,' ', // space
-    // Remaining keys ignored for now
+    '*',0,' ',
+};
+
+char keyboard_shift_map[] = {
+    0, 27, '!', '@', '#', '$', '%', '^', '&', '*', '(', ')', '_', '+', '\b',
+    '\t','Q','W','E','R','T','Y','U','I','O','P','{','}','\n',0,
+    'A','S','D','F','G','H','J','K','L',':','\"','~',0,
+    '|','Z','X','C','V','B','N','M','<','>','?',0,
+    '*',0,' ',
 };
 
 char get_char_from_keyboard() {
-    static uint8_t last_key_pressed = 0; // track last pressed key (not released)
-    while (1) {
-        uint8_t scancode = port_byte_in(KEYBOARD_PORT);
+    static uint8_t last_key_pressed = 0;
+    static int shift_pressed = 0;
+    static int caps_lock_on = 0;
+    static int caps_lock_down = 0;
 
-        // Check if key release (bit 7 set)
+    while (1) {
+        uint8_t scancode = inb(KEYBOARD_PORT);
+
+        // Key release
         if (scancode & 0x80) {
-            if ((scancode & 0x7F) == last_key_pressed) {
+            uint8_t released = scancode & 0x7F;
+
+            if (released == 0x2A || released == 0x36) {
+                shift_pressed = 0;
+            } else if (released == 0x3A) {
+                caps_lock_down = 0; // Caps Lock key released
+            }
+
+            if (released == last_key_pressed) {
                 last_key_pressed = 0;
+            }
+
+            continue;
+        }
+
+        // Shift press
+        if (scancode == 0x2A || scancode == 0x36) {
+            shift_pressed = 1;
+            continue;
+        }
+
+        // Caps Lock press (toggle only on new press)
+        if (scancode == 0x3A) {
+            if (!caps_lock_down) {
+                caps_lock_on = !caps_lock_on;
+                caps_lock_down = 1;
             }
             continue;
         }
@@ -58,7 +75,19 @@ char get_char_from_keyboard() {
 
         if (scancode < sizeof(keyboard_map)) {
             char c = keyboard_map[scancode];
-            if (c != 0) return c;
+
+            // Letters affected by caps/shift logic
+            if (c >= 'a' && c <= 'z') {
+                int upper = shift_pressed ^ caps_lock_on;
+                return upper ? (c - 32) : c;
+            }
+
+            // Non-letters only affected by shift
+            if (shift_pressed && keyboard_shift_map[scancode]) {
+                return keyboard_shift_map[scancode];
+            }
+
+            return c;
         }
     }
 }
