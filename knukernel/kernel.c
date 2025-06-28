@@ -1,7 +1,6 @@
 #include "vga.h"
 #include "keyboard.h"
 #include "pci.h"
-#include "delay.h"
 #include "io.h"
 #include "knulib.h"
 extern char get_char_from_keyboard();
@@ -429,7 +428,6 @@ void kmain(void) {
         } else if (strcmp(buffer, "reboot") == 0) {
             current_color = 0x0B;
             print("\n[?] You've got it! Rebooting..", &offset);
-            delay_ms(500);
             reboot();
 
 
@@ -437,8 +435,6 @@ void kmain(void) {
 
         } else if (strcmp(buffer, "shutdown --qemu") == 0) {
             current_color = 0x0B;
-            print("\n[?] You've got it! Shutting down..", &offset);
-            delay_ms(500);
             shutdown_qemu();
 
 
