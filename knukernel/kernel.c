@@ -495,8 +495,7 @@ void kmain(void) {
             print("\nThis is red text!", &offset);
             current_color = WHITE_ON_BLACK;
 
-        } else if (strcmp(buffer, "panic") == 0) {
-            kernel_panic();
+
 
         } else if (strcmp(buffer, "draw") == 0) {
             enter_draw_mode(&offset);
