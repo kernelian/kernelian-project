@@ -12,7 +12,9 @@ SRC_C = \
 	drivers/vga.c \
 	drivers/keyboard.c \
 	drivers/pci.c \
-	libk/knulib.c
+	libk/knulib.c \
+	sys/panic.c \
+	sys/idt.c
 
 
 OBJ_C = $(SRC_C:.c=.o)
@@ -28,8 +30,9 @@ all: $(KERNEL_BIN)
 
 
 
-$(KERNEL_BIN): $(BOOT_OBJ) $(OBJ_C)
+$(KERNEL_BIN): $(BOOT_OBJ) $(OBJ_C) sys/idt_load.o
 	$(LD) $(LDFLAGS) -o $@ $^
+
 
 # Explicit rule for subdir file
 libk/knulib.o: libk/knulib.c
@@ -44,6 +47,8 @@ libk/knulib.o: libk/knulib.c
 	$(CC) $(CFLAGS) -c $< -o $@
 
 $(BOOT_OBJ): knukernel/boot.s
+	$(AS) -f elf32 $< -o $@
+sys/idt_load.o: sys/idt_load.asm
 	$(AS) -f elf32 $< -o $@
 
 iso: $(KERNEL_BIN)

@@ -12,3 +12,10 @@ int strncmp(const char* s1, const char* s2, int n) {
     }
     return 0;
 }
+
+
+int strlen(const char *str) {
+    int len = 0;
+    while (str[len]) len++;
+    return len;
+}

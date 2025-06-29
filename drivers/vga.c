@@ -49,6 +49,11 @@ void set_char_at_video_memory_color(char character, int offset, unsigned char co
     vidmem[offset + 1] = color;
 }
 
+void disable_cursor() {
+    port_byte_out(VGA_CTRL_REGISTER, 0x0A);
+    port_byte_out(VGA_DATA_REGISTER, 0x20); // turn off cursor
+}
+
 
 
 

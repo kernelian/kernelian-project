@@ -19,6 +19,7 @@ void port_byte_out(unsigned short port, unsigned char data);
 
 void set_cursor(int offset);
 int get_cursor();
+void disable_cursor();
 
 unsigned char make_color(unsigned char fg, unsigned char bg);
 

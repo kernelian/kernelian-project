@@ -3,6 +3,8 @@
 #include "pci.h"
 #include "io.h"
 #include "knulib.h"
+#include "panic.h"
+#include "idt.h"
 extern char get_char_from_keyboard();
 
 
@@ -16,6 +18,10 @@ void reboot() {
     while (inb(0x64) & 0x02);  // Wait until input buffer is clear
     outb(0x64, 0xFE);          // Send reboot command
     for (;;) __asm__ volatile ("hlt");
+}
+
+void panic_stub() {
+    kernel_panic();
 }
 
 
@@ -368,6 +374,13 @@ void kmain(void) {
     int offset = 0;
     print("Hello! Welcome to Kernelian 0.1. Type help for the list of commands.\n", &offset);
 
+    idt_init();
+
+
+
+
+
+
     while (1) {
         new_prompt_line(&offset);
 
@@ -396,6 +409,7 @@ void kmain(void) {
                 set_cursor(offset);
             }
         }
+
 
 
 
@@ -438,6 +452,8 @@ void kmain(void) {
             shutdown_qemu();
 
 
+
+
         } else if (strcmp(buffer, "ram") == 0) {
             current_color = 0x0F;
             print_ram_info(&offset);
@@ -478,6 +494,9 @@ void kmain(void) {
             current_color = 0x0C;
             print("\nThis is red text!", &offset);
             current_color = WHITE_ON_BLACK;
+
+        } else if (strcmp(buffer, "panic") == 0) {
+            kernel_panic();
 
         } else if (strcmp(buffer, "draw") == 0) {
             enter_draw_mode(&offset);
