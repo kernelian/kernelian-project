@@ -60,7 +60,6 @@ run: iso
 	qemu-system-i386 kernelian.iso
 
 clean:
-
 	rm -f $(KERNEL_BIN) knukernel/*.o drivers/*.o libk/*.o sys/*.o
 	rm -f kernelian.iso
 
