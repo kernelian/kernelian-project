@@ -1,6 +1,6 @@
 # The Kernelian Operating System or KNU (Kernelian's not UNIX!)
 
-Kernelian is an i386 OS that can run on (almost, no floppy support since Kernelian is growing and the image can't be fit on a floppy) any i386 computer!
+Kernelian is an i386 OS that can run on (almost, no floppy support since Kernelian is growing and the image can't be fit on a floppy, even when using a custom bootloader) any i386 computer!
 
 It's not perfect, because it can have weird bugs all the time. (and sometimes some feature removals because of that)
 
